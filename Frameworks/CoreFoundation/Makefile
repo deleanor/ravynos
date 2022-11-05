@@ -198,6 +198,7 @@ INCS= \
 WARNS:=2
 
 CFLAGS+= ${FMWK_CFLAGS} \
+	-ObjC \
 	-I${.CURDIR}/Headers \
 	-I${.CURDIR}/Headers/CoreFoundation \
 	-I${.CURDIR}/../../include \
@@ -208,6 +209,7 @@ CFLAGS+= ${FMWK_CFLAGS} \
 	-D_POSIX_THREADS \
 	-DDEPLOYMENT_RUNTIME_C \
 	-DCF_BUILDING_CF \
+	-DINCLUDE_OBJC \
 	-std=c11
 LDFLAGS+= ${FMWK_LDFLAGS} \
 	  -lexecinfo -lpthread -ldispatch -licuuc -licui18n -licudata -lm -lcurl

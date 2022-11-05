@@ -57,7 +57,9 @@ DEFINE_WEAK_CFNETWORK_FUNC_FAIL(Boolean, _CFURLDestroyResource, (CFURLRef A, SIn
 
 #endif
 
+#ifndef __OBJC__
 typedef struct __NSString__ *NSString;
+#endif
 
 /*
     Pre-10.6 property keys
