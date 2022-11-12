@@ -19,7 +19,7 @@
 CFURLRef _Nullable _CFKnownLocationCreatePreferencesURLForUser(CFKnownLocationUser user, CFStringRef _Nullable username) {
     CFURLRef location = NULL;
     
-#if TARGET_OS_MAC
+#if TARGET_OS_MAC || __RAVYNOS__
     
 /*
  Building for a Darwin OS. (We use these paths on Swift builds as well, so that we can interoperate a little with Darwin's defaults(1) command and the other system facilities; but you want to use the system version of CF if possible on those platforms, which will talk to cfprefsd(8) and has stronger interprocess consistency guarantees.)
@@ -39,7 +39,7 @@ CFURLRef _Nullable _CFKnownLocationCreatePreferencesURLForUser(CFKnownLocationUs
             // passthrough to:
         case _kCFKnownLocationUserByName: {
             CFURLRef home = CFCopyHomeDirectoryURLForUser(username);
-            location = CFURLCreateWithFileSystemPathRelativeToBase(kCFAllocatorSystemDefault, CFSTR("/Library/Preferences"), kCFURLPOSIXPathStyle, true, home);
+            location = CFURLCreateWithFileSystemPathRelativeToBase(kCFAllocatorSystemDefault, CFSTR("Library/Preferences"), kCFURLPOSIXPathStyle, true,  home);
             CFRelease(home);
             
             break;
