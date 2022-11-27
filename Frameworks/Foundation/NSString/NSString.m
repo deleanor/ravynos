@@ -58,6 +58,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #include <limits.h>
 #include <string.h>
 
+#import <CoreFoundation/CFString.h>
+
 extern BOOL NSObjectIsKindOfClass(id object,Class kindOf);
 
 const NSUInteger NSMaximumStringLength=INT_MAX-1;
@@ -109,7 +111,9 @@ extern int *__NSConstantStringClassReference;
 }
 
 -initWithCString:(const char *)cString {
-   return [self initWithBytes:cString length:strlen(cString) encoding:defaultEncoding()];
+   NSDeallocateObject(self);
+   self = (id)CFStringCreateWithCString(kCFAllocatorDefault, cString, kCFStringEncodingASCII);
+   return self;
 }
 
 -initWithCString:(const char *)cString encoding:(NSStringEncoding)encoding {
@@ -324,7 +328,7 @@ extern int *__NSConstantStringClassReference;
 }
 
 +stringWithCString:(const char *)cString {
-   return [[[self allocWithZone:NULL] initWithCString:cString] autorelease];
+   return (id)CFStringCreateWithCString(kCFAllocatorDefault, cString, kCFStringEncodingASCII);
 }
 
 +stringWithString:(NSString *)string {
@@ -581,38 +585,7 @@ static NSComparisonResult compareWithOptions(NSString *self,NSString *other,NSSt
 }
 
 static inline BOOL isEqualString(NSString *str1,NSString *str2){
-   if(str2==nil)
-    return NO;
-   if(str1==str2)
-    return YES;
-   else {
-    NSUInteger length1=[str1 length],length2=[str2 length];
-
-    if(length1!=length2)
-     return NO;
-    if(length1==0)
-     return YES;
-    else {
-    unichar  *buffer1 = NSZoneMalloc(NULL, sizeof(unichar) * length1);
-    unichar  *buffer2 = NSZoneMalloc(NULL, sizeof(unichar) * length2);
-
-     int      i;
-
-     [str1 getCharacters:buffer1];
-     [str2 getCharacters:buffer2];
-
-     for(i=0;i<length1;i++) {
-         if(buffer1[i]!=buffer2[i]) {
-             NSZoneFree(NULL, buffer1);
-             NSZoneFree(NULL, buffer2);
-           return NO;
-         }
-      }
-     NSZoneFree(NULL, buffer1);
-     NSZoneFree(NULL, buffer2);
-     return YES;
-    }
-   }
+   return CFStringCompare((CFStringRef)str1, (CFStringRef)str2, 0) == kCFCompareEqualTo;
 }
 
 
@@ -1589,24 +1562,7 @@ static inline void reverseString(unichar *buf, NSUInteger len) {
 
 - (const char *)UTF8String
 {
-    NSZone *zone = [self zone];
-    NSUInteger length = [self length];
-    unichar *buffer = NSZoneMalloc(NULL, (1 + length) * sizeof(unichar));
-    NSUInteger byteLength = 0;
-    char *bytes = NULL;
-
-    [self getCharacters:buffer];
-    bytes = NSString_unicodeToAnyCString(NSUTF8StringEncoding, buffer, length, NO, &byteLength, zone, YES);
-    if (bytes == NULL) {
-        NSZoneFree(NULL, buffer);
-        return NULL;
-    }
-
-    // FIXME obviously the char* shall be handled by the autorelease pool or garbage collector
-    //       that's bad design
-    NSData* result = [NSData dataWithBytesNoCopy:bytes length:byteLength];
-    NSZoneFree(NULL, buffer);
-    return [result bytes];
+    return CFStringGetCStringPtr(self, kCFStringEncodingUTF8);
 }
 
 -(NSString *)stringByReplacingPercentEscapesUsingEncoding:(NSStringEncoding)encoding {

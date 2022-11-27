@@ -2,6 +2,7 @@
 
 FRAMEWORK=Foundation
 SRCS= \
+./NSInitialize.m \
 ./NSFormatter.m \
 ./NSDictionary/NSEnumerator_dictionaryObjects.m \
 ./NSDictionary/NSMutableDictionary.m \
